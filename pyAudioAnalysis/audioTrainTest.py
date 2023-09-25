@@ -88,7 +88,8 @@ def extract_features_and_train(
         classifier_type:            "svm" or "knn" or "randomforest" or
                                     "gradientboosting" or "extratrees"
         model_name:                 name of the model to be saved
-        dict_of_ids:                a dictionary which has as keys the full path of audio files and as values the respective group ids
+        dict_of_ids:                a dictionary which has as keys the full path of audio files
+                                    and as values the respective group ids
     RETURNS:
         None. Resulting classifier along with the respective model
         parameters are saved on files.
@@ -226,7 +227,8 @@ def load_model(model_name):
 
 def group_split(X, y, train_indeces, test_indeces, split_id):
     """
-    This function splits the data in train and test set according to train/test indeces based on LeaveOneGroupOut
+    This function splits the data in train and test set according to train/test indeces
+    based on LeaveOneGroupOut
     ARGUMENTS:
         X: array-like of shape (n_samples, n_features)
         y: array-like of shape (n_samples,)
@@ -311,13 +313,10 @@ def evaluate_classifier(
         f1_per_exp = []
         # y_pred_all = []
         # y_test_all = []
+        print("Param = {0:.5f} - classifier Evaluation ".format(C))
         for e in range(n_exp):
             y_pred = []
             # for each cross-validation iteration:
-            print(
-                "Param = {0:.5f} - classifier Evaluation "
-                "Experiment {1:d} of {2:d}".format(C, e + 1, n_exp)
-            )
             # split features:
 
             if list_of_ids:
