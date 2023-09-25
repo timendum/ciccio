@@ -8,7 +8,6 @@ from pyAudioAnalysis import MidTermFeatures as aF
 from pyAudioAnalysis import audioBasicIO
 
 MODEL_NAME = "data\\svmSM"
-STEP_SIZE = 5  # seconds
 
 
 def train(args):
@@ -36,8 +35,8 @@ def _analyze(signal, sampling_rate, model):
     ) = model
     classes = []
     probabilites = []
-    for i in range(0, len(signal), STEP_SIZE * sampling_rate):
-        subsignal = signal[i : i + (STEP_SIZE * sampling_rate)]
+    for i in range(0, len(signal), aF.STEP_SIZE * sampling_rate):
+        subsignal = signal[i : i + (aF.STEP_SIZE * sampling_rate)]
         # feature extraction:
         mid_features, _, = aF.mid_feature_extraction(
             subsignal,
@@ -78,7 +77,7 @@ def _find_splits(classes, probabilites):
                     # look at last 0 frame
                     delta = probabilites[n_step - ongoning_change][1] + 0.1
                     # include it based on the probabilty of speech + 0.1
-                split_at.append((n_step - ongoning_change + delta) * STEP_SIZE)
+                split_at.append((n_step - ongoning_change + delta) * aF.STEP_SIZE)
                 ongoning_change = 0
             else:
                 ongoning_change += 1

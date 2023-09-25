@@ -6,6 +6,7 @@ import numpy as np
 
 from pyAudioAnalysis import ShortTermFeatures, audioBasicIO
 
+STEP_SIZE = 5  # seconds
 eps = 0.00000001
 
 """ Time-domain audio features """
@@ -104,28 +105,30 @@ def directory_feature_extraction(folder_path, mid_window, mid_step, short_window
         if signal.shape[0] < float(sampling_rate) / 5:
             print("  (AUDIO FILE TOO SMALL - SKIPPING)")
             continue
-        wav_file_list2.append(file_path)
-        mid_features, short_features = mid_feature_extraction(
-            signal,
-            sampling_rate,
-            round(mid_window * sampling_rate),
-            round(mid_step * sampling_rate),
-            round(sampling_rate * short_window),
-            round(sampling_rate * short_step),
-        )
+        for i in range(0, len(signal), STEP_SIZE * sampling_rate):
+            subsignal = signal[i : i + (STEP_SIZE * sampling_rate)]
+            wav_file_list2.append(file_path + '#' + str(i))
+            mid_features, short_features = mid_feature_extraction(
+                subsignal,
+                sampling_rate,
+                round(mid_window * sampling_rate),
+                round(mid_step * sampling_rate),
+                round(sampling_rate * short_window),
+                round(sampling_rate * short_step),
+            )
 
-        mid_features = np.transpose(mid_features)
-        mid_features = mid_features.mean(axis=0)
-        # long term averaging of mid-term statistics
-        if (not np.isnan(mid_features).any()) and (not np.isinf(mid_features).any()):
-            if len(mid_term_features) == 0:
-                # append feature vector
-                mid_term_features = mid_features
-            else:
-                mid_term_features = np.vstack((mid_term_features, mid_features))
-            t2 = time.time()
-            duration = float(len(signal)) / sampling_rate
-            process_times.append((t2 - t1) / duration)
+            mid_features = np.transpose(mid_features)
+            mid_features = mid_features.mean(axis=0)
+            # long term averaging of mid-term statistics
+            if (not np.isnan(mid_features).any()) and (not np.isinf(mid_features).any()):
+                if len(mid_term_features) == 0:
+                    # append feature vector
+                    mid_term_features = mid_features
+                else:
+                    mid_term_features = np.vstack((mid_term_features, mid_features))
+        t2 = time.time()
+        duration = float(len(signal)) / sampling_rate
+        process_times.append((t2 - t1) / duration)
     if len(process_times) > 0:
         print(
             "Feature extraction complexity ratio: "
