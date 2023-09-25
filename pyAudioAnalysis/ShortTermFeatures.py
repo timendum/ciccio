@@ -174,13 +174,13 @@ def mfcc_filter_banks(
         lid = np.arange(
             np.floor(low_freqs * num_fft / sampling_rate) + 1,
             np.floor(cent_freqs * num_fft / sampling_rate) + 1,
-            dtype=np.int,
+            dtype=int,
         )
         lslope = heights[i] / (cent_freqs - low_freqs)
         rid = np.arange(
             np.floor(cent_freqs * num_fft / sampling_rate) + 1,
             np.floor(high_freqs * num_fft / sampling_rate) + 1,
-            dtype=np.int,
+            dtype=int,
         )
         rslope = heights[i] / (high_freqs - cent_freqs)
         fbank[i][lid] = lslope * (nfreqs[lid] - low_freqs)
@@ -317,6 +317,7 @@ def feature_extraction(signal, sampling_rate, window, step, deltas=True):
     #    n_harmonic_feats
 
     features = []
+    feature_vector_prev = None
     # for each short-term window to end of signal
     while current_position + window - 1 < number_of_samples:
         count_fr += 1
