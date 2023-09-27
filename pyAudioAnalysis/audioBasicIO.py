@@ -20,7 +20,7 @@ def read_audio_file(input_file):
         elif extension in [".mp3", ".au", ".ogg"]:
             sampling_rate, signal = read_audio_generic(input_file)
         else:
-            print("Error: unknown file type {extension}")
+            raise ValueError("Error: unknown file type {extension}")
     else:
         sampling_rate, signal = read_audio_generic(input_file)
 
@@ -53,7 +53,7 @@ def read_audio_generic(input_file):
                 temp_signal.append(data[chn :: audiofile.channels])
             signal = np.array(temp_signal).T
     except:
-        print("Error: file not found or other I/O error. (DECODING FAILED)")
+        raise ValueError("Error: file not found or other I/O error. (DECODING FAILED)")
     return sampling_rate, signal
 
 

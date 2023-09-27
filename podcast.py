@@ -29,9 +29,13 @@ def find_mp3() -> Puntata | None:
         title = title.split("|")[1].strip()
     return Puntata(r.url, title, mp3r[0])
 
+
 def already_done(p: Puntata, outdir: str) -> bool:
-    feed = feedendum.from_rss_file(path.join(outdir, "terzo-incomodo.xml"))
-    return p.title in feed.items[0].title
+    try:
+        feed = feedendum.from_rss_file(path.join(outdir, "terzo-incomodo.xml"))
+        return p.title in feed.items[0].title
+    except OSError:
+        return False
 
 
 def make_feed(p: Puntata, files: list[str], outdir: str) -> None:
