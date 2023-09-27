@@ -1,18 +1,48 @@
-print("Starting...")
 # flake8: noqa: E402
 import argparse
+import json
+import logging
+import logging.config
 import os
 import subprocess
+import sys
 
+import podcast
+
+MODEL_NAME = "data/svmSM"
+
+
+def _get_logger(logger_name=__name__) -> logging.Logger:
+    try:
+        with open("logging.json", encoding="utf-8") as logconfigf:
+            logging.config.dictConfig(json.load(logconfigf))
+        logger = logging.getLogger(logger_name)
+    except OSError:
+        logger = logging.getLogger(logger_name)
+        logger.setLevel(logging.DEBUG)
+        consoleh = logging.StreamHandler(sys.stdout)
+        consoleh.setFormatter(logging.Formatter("%(asctime)s %(levelname)s: %(message)s"))
+        logger.addHandler(consoleh)
+    if "-q" in sys.argv:
+        for handler in logging.getLogger().handlers:
+            if handler.get_name() == "console":
+                handler.setLevel(logging.ERROR)
+    elif "-v" in sys.argv:
+        for handler in logging.getLogger().handlers:
+            if handler.get_name() == "console":
+                handler.setLevel(logging.DEBUG)
+    return logger
+
+
+LOGGER = _get_logger()
+LOGGER.debug("Starting...")
+
+# Slow imports
 import requests
 
 from pyAudioAnalysis import audioTrainTest as aT
 from pyAudioAnalysis import MidTermFeatures as aF
 from pyAudioAnalysis import audioBasicIO
-
-import podcast
-
-MODEL_NAME = "data/svmSM"
 
 
 def train(args):
@@ -63,6 +93,7 @@ def _analyze(signal, sampling_rate, model):
         classes.append(class_id)
         probability = classifier.predict_proba(feature_vector.reshape(1, -1))[0]
         probabilites.append(probability)
+        LOGGER.debug("Step: %d/%d", i / sampling_rate, len(signal) / sampling_rate)
     return classes, probabilites
 
 
@@ -115,17 +146,19 @@ def _split_file(source, split_at) -> list[str]:
 
 
 def split(args) -> list[str]:
-    print("Loading Model...")
+    LOGGER.info("Loading Model...")
     model = aT.load_model(MODEL_NAME)
-    print("Parsing file...")
+    LOGGER.info("Parsing file...")
     sampling_rate, signal = audioBasicIO.read_audio_file(args.source)
-    print("Converting file...")
+    LOGGER.info("Converting file...")
     signal = audioBasicIO.stereo_to_mono(signal)
-    print("Analyzing...")
+    LOGGER.info("Analyzing...")
     classes, probabilites = _analyze(signal, sampling_rate, model)
-    print("Splitting...")
+    LOGGER.info("Splitting...")
     split_at = _find_splits(classes, probabilites)
+    LOGGER.info("Generating podcast files")
     return _split_file(args.source, split_at)
+
 
 def download(args) -> None:
     puntata = podcast.find_mp3()
