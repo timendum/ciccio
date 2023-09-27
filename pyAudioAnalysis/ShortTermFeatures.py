@@ -25,13 +25,13 @@ def zero_crossing_rate(frame):
 
 def energy(frame):
     """Computes signal energy of frame"""
-    return np.sum(frame ** 2) / np.float64(len(frame))
+    return np.sum(frame**2) / np.float64(len(frame))
 
 
 def energy_entropy(frame, n_short_blocks=10):
     """Computes entropy of energy"""
     # total frame energy
-    frame_energy = np.sum(frame ** 2)
+    frame_energy = np.sum(frame**2)
     frame_length = len(frame)
     sub_win_len = int(np.floor(frame_length / n_short_blocks))
     if frame_length != sub_win_len * n_short_blocks:
@@ -41,7 +41,7 @@ def energy_entropy(frame, n_short_blocks=10):
     sub_wins = frame.reshape(sub_win_len, n_short_blocks, order="F").copy()
 
     # Compute normalized sub-frame energies:
-    s = np.sum(sub_wins ** 2, axis=0) / (frame_energy + eps)
+    s = np.sum(sub_wins**2, axis=0) / (frame_energy + eps)
 
     # Compute entropy of the normalized sub-frame energies:
     entropy = -np.sum(s * np.log2(s + eps))
@@ -84,7 +84,7 @@ def spectral_entropy(signal, n_short_blocks=10):
     num_frames = len(signal)
 
     # total spectral energy
-    total_energy = np.sum(signal ** 2)
+    total_energy = np.sum(signal**2)
 
     # length of sub-frame
     sub_win_len = int(np.floor(num_frames / n_short_blocks))
@@ -95,7 +95,7 @@ def spectral_entropy(signal, n_short_blocks=10):
     sub_wins = signal.reshape(sub_win_len, n_short_blocks, order="F").copy()
 
     # compute spectral sub-energies
-    s = np.sum(sub_wins ** 2, axis=0) / (total_energy + eps)
+    s = np.sum(sub_wins**2, axis=0) / (total_energy + eps)
 
     # compute spectral entropy
     entropy = -np.sum(s * np.log2(s + eps))
@@ -120,12 +120,12 @@ def spectral_flux(fft_magnitude, previous_fft_magnitude):
 
 def spectral_rolloff(signal, c):
     """Computes spectral roll-off"""
-    energy = np.sum(signal ** 2)
+    energy = np.sum(signal**2)
     fft_length = len(signal)
     threshold = c * energy
     # Ffind the spectral rolloff as the frequency position
     # where the respective spectral energy is equal to c*totalEnergy
-    cumulative_sum = np.cumsum(signal ** 2) + eps
+    cumulative_sum = np.cumsum(signal**2) + eps
     a = np.nonzero(cumulative_sum > threshold)[0]
     if len(a) > 0:
         sp_rolloff = np.float64(a[0]) / (float(fft_length))
@@ -236,7 +236,7 @@ def chroma_features(signal, sampling_rate, num_fft):
     # TODO: 2 bug with large windows
 
     num_chroma, num_freqs_per_chroma = chroma_features_init(num_fft, sampling_rate)
-    spec = signal ** 2
+    spec = signal**2
     if num_chroma.max() < num_chroma.shape[0]:
         C = np.zeros((num_chroma.shape[0],))
         C[num_chroma] = spec
@@ -296,7 +296,7 @@ def feature_extraction(signal, sampling_rate, window, step, deltas=True):
 
     # signal normalization
     signal = np.double(signal)
-    signal = signal / (2.0 ** 15)
+    signal = signal / (2.0**15)
 
     signal = dc_normalize(signal)
 
@@ -311,8 +311,8 @@ def feature_extraction(signal, sampling_rate, window, step, deltas=True):
     n_time_spectral_feats = 8
     n_harmonic_feats = 0
     n_mfcc_feats = 13
-    n_chroma_feats = 13
-    n_total_feats = n_time_spectral_feats + n_mfcc_feats + n_harmonic_feats + n_chroma_feats
+    # n_chroma_feats = 13
+    n_total_feats = n_time_spectral_feats + n_mfcc_feats + n_harmonic_feats  # + n_chroma_feats
     #    n_total_feats = n_time_spectral_feats + n_mfcc_feats +
     #    n_harmonic_feats
 
@@ -369,10 +369,10 @@ def feature_extraction(signal, sampling_rate, window, step, deltas=True):
         ).copy()
 
         # chroma features
-        chroma_feature_matrix = chroma_features(fft_magnitude, sampling_rate, num_fft)
-        chroma_features_end = n_time_spectral_feats + n_mfcc_feats + n_chroma_feats - 1
-        feature_vector[mffc_feats_end:chroma_features_end] = chroma_feature_matrix
-        feature_vector[chroma_features_end] = chroma_feature_matrix.std()
+        # chroma_feature_matrix = chroma_features(fft_magnitude, sampling_rate, num_fft)
+        # chroma_features_end = n_time_spectral_feats + n_mfcc_feats + n_chroma_feats - 1
+        # feature_vector[mffc_feats_end:chroma_features_end] = chroma_feature_matrix
+        # feature_vector[chroma_features_end] = chroma_feature_matrix.std()
         if not deltas:
             features.append(feature_vector)
         else:
