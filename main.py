@@ -6,10 +6,16 @@ import logging.config
 import os
 import subprocess
 import sys
+from itertools import chain
+from math import ceil
+
+from pydub.utils import mediainfo_json
 
 import podcast
 
 MODEL_NAME = "data/svmSM"
+
+TIME_SPLIT = 60 * 10
 
 
 def _get_logger(logger_name=__name__) -> logging.Logger:
@@ -40,9 +46,9 @@ LOGGER.debug("Starting...")
 # Slow imports
 import requests
 
-from pyAudioAnalysis import audioTrainTest as aT
 from pyAudioAnalysis import MidTermFeatures as aF
 from pyAudioAnalysis import audioBasicIO
+from pyAudioAnalysis import audioTrainTest as aT
 
 
 def train(args):
@@ -93,7 +99,7 @@ def _analyze(signal, sampling_rate, model):
         classes.append(class_id)
         probability = classifier.predict_proba(feature_vector.reshape(1, -1))[0]
         probabilites.append(probability)
-        LOGGER.debug("Step: %d/%d", i / sampling_rate, len(signal) / sampling_rate)
+        #LOGGER.debug("Step: %d/%d", i / sampling_rate, len(signal) / sampling_rate)
     return classes, probabilites
 
 
@@ -129,6 +135,7 @@ def _find_splits(classes, probabilites):
 
 
 def _split_file(source, split_at) -> list[str]:
+    LOGGER.debug("Splitting %s at %s", source, split_at)
     target = source.replace(".mp3", "")
     filenames = []
     for i in range(0, len(split_at), 2):
@@ -167,12 +174,34 @@ def download(args) -> None:
     if podcast.already_done(puntata, args.outdir):
         return
     r = requests.get(puntata.mp3, allow_redirects=True)
-    open("puntata.mp3", "wb").write(r.content)
+    r.raise_for_status()
     namespace = argparse.Namespace()
     setattr(namespace, "source", "puntata.mp3")
-    files = split(namespace)
+    open(namespace.source, "wb").write(r.content)
+    mediainfo = mediainfo_json(namespace.source)
+    LOGGER.info("Loading Model...")
+    model = aT.load_model(MODEL_NAME)
+    duration = ceil(float(mediainfo["streams"][0]["duration"]))
+    # Split at every TIME_SPLIT, until the end of file (the end here is bigger then duration)
+    ranges = range(0, (ceil(duration / TIME_SPLIT) + 1) * TIME_SPLIT, TIME_SPLIT)
+    # join to [range0, range1, range1, range2, range2, range3, ...]
+    files = _split_file(namespace.source, list(chain.from_iterable(zip(ranges, ranges[1:]))))
+    fclasses, fprobabilites = [], []
+    for i, file, in enumerate(files):
+        LOGGER.info("Parsing file... %d/%d", i+1, len(files))
+        sampling_rate, signal = audioBasicIO.read_audio_file(file)
+        LOGGER.info("Converting file... %d/%d", i+1, len(files))
+        signal = audioBasicIO.stereo_to_mono(signal)
+        LOGGER.info("Analyzing... %d/%d", i+1, len(files))
+        classes, probabilites = _analyze(signal, sampling_rate, model)
+        fclasses.extend(classes)
+        fprobabilites.extend(probabilites)
+        os.unlink(file)
+    LOGGER.info("Splitting...")
+    split_at = _find_splits(fclasses, fprobabilites)
+    files = _split_file(namespace.source, split_at)
     podcast.make_feed(puntata, files, args.outdir)
-    os.unlink("puntata.mp3")
+    os.unlink(namespace.source)
 
 
 def main():
