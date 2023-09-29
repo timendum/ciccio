@@ -2,7 +2,7 @@ import re
 import shutil
 from collections import namedtuple
 from datetime import datetime, timedelta
-from os import path
+from os import path, getenv
 from urllib.parse import urljoin
 
 import feedendum
@@ -10,6 +10,8 @@ import requests
 from bs4 import BeautifulSoup
 
 Puntata = namedtuple("Puntata", ["url", "title", "mp3"])
+
+BASE_URL = getenv("BASE_URL", ".")
 
 
 def find_mp3() -> Puntata | None:
@@ -61,7 +63,7 @@ def make_feed(p: Puntata, files: list[str], outdir: str) -> None:
                 update=now + timedelta(minutes=i),
                 _data={
                     "enclosure": {
-                        "@url": f"./{f}",
+                        "@url": urljoin(BASE_URL, f),
                         "@type": "audio/mpeg",
                         "@length": str(path.getsize(f)),
                     }
