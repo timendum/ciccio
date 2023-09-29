@@ -15,6 +15,9 @@ import podcast
 
 MODEL_NAME = "data/svmSM"
 
+# The input mp3 file for the `download` command will be splitted in smaller chunks,
+# so the memory footprint is smaller.
+# This will determine the duration (in seconds) of chunks.
 TIME_SPLIT = 60 * 10
 
 
@@ -135,6 +138,12 @@ def _find_splits(classes, probabilites):
 
 
 def _split_file(source, split_at) -> list[str]:
+    """"
+    Split add:
+    - from split_at[0] to split_at[1]
+    - from split_at[2] to split_at[3]
+    Chunks in the middle (ie between 1 and 2) will be skipped.
+    """
     LOGGER.debug("Splitting %s at %s", source, split_at)
     target = source.replace(".mp3", "")
     filenames = []
