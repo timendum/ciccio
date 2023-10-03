@@ -5,7 +5,7 @@ import sklearn.decomposition
 import sklearn.ensemble
 import sklearn.metrics
 import sklearn.svm
-from sklearn.model_selection import GroupShuffleSplit, train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 from pyAudioAnalysis import MidTermFeatures as aF
@@ -74,7 +74,6 @@ def extract_features_and_train(
     classifier_type,
     model_name,
     train_percentage=0.90,
-    dict_of_ids=None,
 ):
     """
     This function is used as a wrapper to segment-based audio feature extraction
@@ -88,8 +87,6 @@ def extract_features_and_train(
         classifier_type:            "svm" or "knn" or "randomforest" or
                                     "gradientboosting" or "extratrees"
         model_name:                 name of the model to be saved
-        dict_of_ids:                a dictionary which has as keys the full path of audio files
-                                    and as values the respective group ids
     RETURNS:
         None. Resulting classifier along with the respective model
         parameters are saved on files.
@@ -100,10 +97,6 @@ def extract_features_and_train(
         paths, mid_window, mid_step, short_window, short_step
     )
     file_names = [item for sublist in file_names for item in sublist]
-    if dict_of_ids:
-        list_of_ids = [dict_of_ids[file] for file in file_names]
-    else:
-        list_of_ids = None
     if len(features) == 0:
         print("trainSVM_feature ERROR: No data found in any input folder!")
         return
@@ -141,7 +134,6 @@ def extract_features_and_train(
         classifier_type,
         classifier_par,
         1,
-        list_of_ids,
         n_exp=-1,
         train_percentage=train_percentage,
     )
@@ -252,7 +244,6 @@ def evaluate_classifier(
     classifier_name,
     params,
     parameter_mode,
-    list_of_ids=None,
     n_exp=-1,
     train_percentage=0.90,
 ):
@@ -300,13 +291,6 @@ def evaluate_classifier(
     if n_exp == -1:
         n_exp = int(50000 / n_samples_total) + 1
 
-    if list_of_ids:
-        train_indeces, test_indeces = [], []
-        gss = GroupShuffleSplit(n_splits=n_exp, train_size=0.8)
-        for train_index, test_index in gss.split(X, y, list_of_ids):
-            train_indeces.append(train_index)
-            test_indeces.append(test_index)
-
     for C in params:
         # for each param value
         cm = np.zeros((n_classes, n_classes))
@@ -319,12 +303,9 @@ def evaluate_classifier(
             # for each cross-validation iteration:
             # split features:
 
-            if list_of_ids:
-                X_train, X_test, y_train, y_test = group_split(X, y, train_indeces, test_indeces, e)
-            else:
-                X_train, X_test, y_train, y_test = train_test_split(
-                    X, y, test_size=1 - train_percentage
-                )
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y, test_size=1 - train_percentage
+            )
 
             # mean/std scale the features:
             scaler = StandardScaler()
