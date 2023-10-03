@@ -81,6 +81,15 @@ def _analyze(signal, sampling_rate, model):
     probabilites = []
     for i in range(0, len(signal), aF.STEP_SIZE * sampling_rate):
         subsignal = signal[i : i + (aF.STEP_SIZE * sampling_rate)]
+        if len(subsignal) < round(sampling_rate * short_step):
+            LOGGER.debug(
+                "Remaining signal is too short: from %d to %d",
+                i / sampling_rate,
+                i / sampling_rate + aF.STEP_SIZE,
+            )
+            # keep previous
+            classes.append(classes[-1])
+            probabilites.append(probability[-1])
         # feature extraction:
         (
             mid_features,
@@ -102,7 +111,7 @@ def _analyze(signal, sampling_rate, model):
         classes.append(class_id)
         probability = classifier.predict_proba(feature_vector.reshape(1, -1))[0]
         probabilites.append(probability)
-        #LOGGER.debug("Step: %d/%d", i / sampling_rate, len(signal) / sampling_rate)
+        # LOGGER.debug("Step: %d/%d", i / sampling_rate, len(signal) / sampling_rate)
     return classes, probabilites
 
 
@@ -138,7 +147,7 @@ def _find_splits(classes, probabilites):
 
 
 def _split_file(source, split_at) -> list[str]:
-    """"
+    """ "
     Split add:
     - from split_at[0] to split_at[1]
     - from split_at[2] to split_at[3]
@@ -196,12 +205,15 @@ def download(args) -> None:
     # join to [range0, range1, range1, range2, range2, range3, ...]
     files = _split_file(namespace.source, list(chain.from_iterable(zip(ranges, ranges[1:]))))
     fclasses, fprobabilites = [], []
-    for i, file, in enumerate(files):
-        LOGGER.info("Parsing file... %d/%d", i+1, len(files))
+    for (
+        i,
+        file,
+    ) in enumerate(files):
+        LOGGER.info("Parsing file... %d/%d", i + 1, len(files))
         sampling_rate, signal = audioBasicIO.read_audio_file(file)
-        LOGGER.info("Converting file... %d/%d", i+1, len(files))
+        LOGGER.info("Converting file... %d/%d", i + 1, len(files))
         signal = audioBasicIO.stereo_to_mono(signal)
-        LOGGER.info("Analyzing... %d/%d", i+1, len(files))
+        LOGGER.info("Analyzing... %d/%d", i + 1, len(files))
         classes, probabilites = _analyze(signal, sampling_rate, model)
         fclasses.extend(classes)
         fprobabilites.extend(probabilites)

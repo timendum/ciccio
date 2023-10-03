@@ -107,7 +107,10 @@ def directory_feature_extraction(folder_path, mid_window, mid_step, short_window
             continue
         for i in range(0, len(signal), STEP_SIZE * sampling_rate):
             subsignal = signal[i : i + (STEP_SIZE * sampling_rate)]
-            wav_file_list2.append(file_path + '#' + str(i))
+            if len(subsignal) < round(sampling_rate * short_step):
+                # the remaining subsignal is smaller than the short_step, skip it
+                continue
+            wav_file_list2.append(file_path + "#" + str(i))
             mid_features, short_features = mid_feature_extraction(
                 subsignal,
                 sampling_rate,
