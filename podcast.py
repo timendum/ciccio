@@ -60,7 +60,7 @@ def make_feed(p: Puntata, files: list[str], outdir: str) -> None:
                 title=f"{p.title} - {i + 1:0>2}",
                 url=f"{p.url}#{i:0>2}",
                 id=f"{p.url}#{i:0>2}",
-                content=f"Spezzone {i + 1} di {(len(files) + 1)}\nDa {p.mp3}",
+                content=f"Spezzone {i + 1} di {(len(files))}\nDa {p.mp3}",
                 update=now + timedelta(minutes=i),
                 _data={
                     "enclosure": {
