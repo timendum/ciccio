@@ -14,12 +14,13 @@ Puntata = namedtuple("Puntata", ["url", "title", "mp3"])
 BASE_URL = getenv("BASE_URL", ".")
 
 
-def find_mp3() -> Puntata | None:
-    r = requests.get("https://www.deejay.it/programmi/il-terzo-incomodo/puntate/")
-    r.raise_for_status()
-    hpuntate = BeautifulSoup(r.text, features="lxml")
-    puntate = [urljoin(r.url, x["href"]) for x in hpuntate.css.select("h1 a")]
-    puntata = puntate[0]
+def find_mp3(puntata) -> Puntata | None:
+    if not puntata:
+        r = requests.get("https://www.deejay.it/programmi/il-terzo-incomodo/puntate/")
+        r.raise_for_status()
+        hpuntate = BeautifulSoup(r.text, features="lxml")
+        puntate = [urljoin(r.url, x["href"]) for x in hpuntate.css.select("h1 a")]
+        puntata = puntate[0]
     r = requests.get(puntata)
     hpuntata = BeautifulSoup(r.text, features="lxml")
     r.raise_for_status()

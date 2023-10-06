@@ -186,7 +186,7 @@ def split(args) -> list[str]:
 
 
 def download(args) -> None:
-    puntata = podcast.find_mp3()
+    puntata = podcast.find_mp3(args.url)
     if not puntata:
         raise ValueError("No puntata")
     if podcast.already_done(puntata, args.outdir):
@@ -235,6 +235,7 @@ def main():
     parser_split.add_argument("source", type=str)
     parser_download = subparsers.add_parser("download", help="Download a new episode and split it")
     parser_download.add_argument("outdir", type=str)
+    parser_download.add_argument("-url", type=str)
     parser_download.set_defaults(func=download)
     args = parser.parse_args()
     if "func" in args:
