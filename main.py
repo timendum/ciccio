@@ -146,7 +146,7 @@ def _find_splits(classes, probabilites):
     return split_at
 
 
-def _split_file(source, split_at) -> list[str]:
+def _split_file(source, split_at, fade=False) -> list[str]:
     """ "
     Split add:
     - from split_at[0] to split_at[1]
@@ -156,15 +156,34 @@ def _split_file(source, split_at) -> list[str]:
     LOGGER.debug("Splitting %s at %s", source, split_at)
     target = source.replace(".mp3", "")
     filenames = []
+    delta = 0
+    if fade:
+        delta = 3
     for i in range(0, len(split_at), 2):
-        split_command = ["ffmpeg", "-y", "-i", source, "-ss", str(split_at[i])]
+        split_command = ["ffmpeg", "-y", "-i", source, "-ss", str(split_at[i] - delta)]
         try:
-            split_command.extend(["-to", str(split_at[i + 1])])
+            split_command.extend(["-to", str(split_at[i + 1] + delta)])
         except IndexError:
             # end of file
             pass
         filename = f"{target}_{int(i/2)+1:02}.mp3"
-        split_command.extend(["-acodec", "copy", filename])
+        if fade:
+            try:
+                split_command.extend(
+                    [
+                        "-af",
+                        f"afade=t=in:st={split_at[i] - delta}:d={delta}:curve=qsin,"
+                        f"afade=t=out:st={split_at[i + 1] + delta}:d={delta}:curve=qsin",
+                    ]
+                )
+            except IndexError:
+                # end of file
+                split_command.extend(
+                    ["-af", f"afade=t=in:st={split_at[i] - delta}:d={delta}:curve=qsin"]
+                )
+        else:
+            split_command.extend(["-acodec", "copy"])
+        split_command.append(filename)
         subprocess.run(split_command, capture_output=True)
         filenames.append(filename)
     return filenames
@@ -182,7 +201,7 @@ def split(args) -> list[str]:
     LOGGER.info("Splitting...")
     split_at = _find_splits(classes, probabilites)
     LOGGER.info("Generating podcast files")
-    return _split_file(args.source, split_at)
+    return _split_file(args.source, split_at, True)
 
 
 def download(args) -> None:
