@@ -1,0 +1,413 @@
+<!DOCTYPE HTML>
+<!--
+	Phantom by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html lang="it-IT">
+	<head>
+		<title>Chiacchiericcio - Podcast non ufficiale</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <link rel="alternate" type="application/rss+xml" title="Podcast" href="./chiacchiericcio.xml"/>
+		<style>
+
+/*
+	Phantom by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+*/
+
+html, body, div, span, h1, h2, h3, h4, h5, h6, p, blockquote,
+pre, a, em, img, ins, kbd, q, s, samp,
+small, strong, tt, var, b,
+u, i, center, dl, dt, dd, ol, ul, li, fieldset,
+article, aside, footer, header, 
+section, summary {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;}
+
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+	display: block;}
+
+body {
+	line-height: 1;
+}
+
+ol, ul {
+	list-style: none;
+}
+
+blockquote, q {
+	quotes: none;
+}
+
+	blockquote:before, blockquote:after, q:before, q:after {
+		content: '';
+		content: none;
+	}
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+body {
+	-webkit-text-size-adjust: none;
+}
+
+mark {
+	background-color: transparent;
+	color: inherit;
+}
+
+input::-moz-focus-inner {
+	border: 0;
+	padding: 0;
+}
+
+input, select, textarea {
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	-ms-appearance: none;
+	appearance: none;
+}
+
+/* Basic */
+
+	@-ms-viewport {
+		width: device-width;
+	}
+
+	body {
+		-ms-overflow-style: scrollbar;
+	}
+
+	@media screen and (max-width: 480px) {
+
+		html, body {
+			min-width: 320px;
+		}
+
+	}
+
+	html {
+		box-sizing: border-box;
+	}
+
+	*, *:before, *:after {
+		box-sizing: inherit;
+	}
+
+	body {
+		background: #ffffff;
+	}
+
+/* Type */
+
+	body, input, select, textarea {
+		color: #585858;
+		font-family: Helvetica, sans-serif;
+		font-size: 16pt;
+		font-weight: 300;
+		line-height: 1.75;
+	}
+
+		@media screen and (max-width: 1680px) {
+
+			body, input, select, textarea {
+				font-size: 14pt;
+			}
+
+		}
+
+		@media screen and (max-width: 1280px) {
+
+			body, input, select, textarea {
+				font-size: 12pt;
+			}
+
+		}
+
+	a {
+		-moz-transition: border-bottom-color 0.2s ease, color 0.2s ease;
+		-webkit-transition: border-bottom-color 0.2s ease, color 0.2s ease;
+		-ms-transition: border-bottom-color 0.2s ease, color 0.2s ease;
+		transition: border-bottom-color 0.2s ease, color 0.2s ease;
+		text-decoration: none;
+		color: #585858;
+		border-bottom: dotted 1px rgba(88, 88, 88, 0.5);
+	}
+
+		a:hover {
+			border-bottom-color: transparent;
+			color: #f2849e !important;
+		}
+
+	strong, b {
+		font-weight: 900;
+	}
+
+	em, i {
+		font-style: italic;
+	}
+
+	p {
+		margin: 0 0 0.4em 0;
+	}
+
+	h1 {
+		font-size: 2.75em;
+		font-weight: 700;
+		line-height: 1.3;
+		margin: 0 0 0.5em 0;
+		letter-spacing: -0.035em;
+	}
+
+		h1 a {
+			color: inherit;
+		}
+
+		@media screen and (max-width: 736px) {
+
+			h1 {
+				font-size: 2em;
+				margin: 0 0 1em 0;
+			}
+
+		}
+
+		@media screen and (max-width: 360px) {
+
+			h1 {
+				font-size: 1.75em;
+			}
+
+		}
+
+	h2, h3, h4, h5, h6 {
+		font-weight: 900;
+		line-height: 1.5;
+		margin: 0 0 2em 0;
+		text-transform: uppercase;
+		letter-spacing: 0.35em;
+	}
+
+		h2 a, h3 a, h4 a, h5 a, h6 a {
+			color: inherit;
+		}
+
+	h2 {
+		font-size: 1.1em;
+	}
+
+	h3 {
+		font-size: 1em;
+	}
+
+	h4 {
+		font-size: 0.8em;
+	}
+
+	h5 {
+		font-size: 0.8em;
+	}
+
+	h6 {
+		font-size: 0.8em;
+	}
+
+	@media screen and (max-width: 980px) {
+
+		h1 br, h2 br, h3 br, h4 br, h5 br, h6 br {
+			display: none;
+		}
+
+	}
+
+	@media screen and (max-width: 736px) {
+
+		h2 {
+			font-size: 1em;
+		}
+
+		h3 {
+			font-size: 0.8em;
+		}
+
+	}
+
+	sub {
+		font-size: 0.8em;
+		position: relative;
+		top: 0.5em;
+	}
+
+	sup {
+		font-size: 0.8em;
+		position: relative;
+		top: -0.5em;
+	}
+
+	blockquote {
+		border-left: solid 4px #c9c9c9;
+		font-style: italic;
+		margin: 0 0 2em 0;
+		padding: 0.5em 0 0.5em 2em;
+	}
+
+	code {
+		background: rgba(144, 144, 144, 0.075);
+		border-radius: 4px;
+		border: solid 1px #c9c9c9;
+		font-family: "Courier New", monospace;
+		font-size: 0.9em;
+		margin: 0 0.25em;
+		padding: 0.25em 0.65em;
+	}
+
+	hr {
+		border: 0;
+		border-bottom: solid 1px #c9c9c9;
+		margin: 2em 0;
+	}
+
+		hr.major {
+			margin: 3em 0;
+		}
+
+	.align-left {
+		text-align: left;
+	}
+
+	.align-center {
+		text-align: center;
+	}
+
+	.align-right {
+		text-align: right;
+	}
+
+
+/* Section/Article */
+
+    section.n5  article:nth-last-child(-n + 4) {
+      display: none;
+    }
+
+    section.n6  article:nth-last-child(-n + 3) {
+      display: none;
+    }
+
+    section.n7  article:nth-last-child(-n + 2) {
+      display: none;
+    }
+
+    section.n8  article:nth-last-child(-n + 1) {
+      display: none;
+    }
+
+    header, section {
+        margin: 0.5em 0;
+    }
+
+	header p {
+		margin-top: -1em;
+	}
+
+	@media screen and (max-width: 736px) {
+
+		header p {
+			margin-top: 0;
+		}
+
+	}
+
+/* Main */
+
+	#main {
+		padding: 0em 0 6em 0 ;
+	}
+
+		@media screen and (max-width: 736px) {
+
+			#main {
+				padding: 0em 0 4em 0 ;
+			}
+
+		}
+
+
+
+/* Wrapper */
+
+	#wrapper > * > .inner {
+		width: 100%;
+		max-width: 68em;
+		margin: 0 auto;
+		padding: 0 2.5em;
+	}
+
+    @media screen and (max-width: 736px) {
+
+        #wrapper > * > .inner {
+            padding: 0 1.25em;
+        }
+
+    }
+        </style>
+	</head>
+	<body>
+		<!-- Wrapper -->
+			<div id="wrapper">
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+							<header>
+								<h1>Chiacchiericcio - Podcast non ufficiale</h1>
+								<p>Ultima puntata di Chiacchiericcio, ma con solo gli spezzoni di parlato.</p>
+								<p>Indirizzo podcast: <a href="./chiacchiericcio.xml">chiacchiericcio.xml</a>.</p>
+							</header>
+							<section id="puntata">
+                                <p><strong>{{title}}</strong></p>
+                                <p>Generato {{update}}.</p>
+							</section>
+							<section id="spezzoni" class="{{plength}}">
+								<article>
+									<h2><a href="./puntata_01.mp3">Spezzone 1</a></h2>
+								</article>
+								<article>
+									<h2><a href="./puntata_02.mp3">Spezzone 2</a></h2>
+								</article>
+								<article>
+									<h2><a href="./puntata_03.mp3">Spezzone 3</a></h2>
+								</article>
+								<article>
+									<h2><a href="./puntata_04.mp3">Spezzone 4</a></h2>
+								</article>
+								<article>
+									<h2><a href="./puntata_05.mp3">Spezzone 5</a></h2>
+								</article>
+								<article>
+									<h2><a href="./puntata_06.mp3">Spezzone 6</a></h2>
+								</article>
+								<article>
+									<h2><a href="./puntata_07.mp3">Spezzone 7</a></h2>
+								</article>
+								<article>
+									<h2><a href="./puntata_08.mp3">Spezzone 7</a></h2>
+								</article>
+								<article>
+									<h2><a href="./puntata_09.mp3">Spezzone 7</a></h2>
+								</article>
+							</section>
+						</div>
+					</div>
+			</div>
+	</body>
+</html>

@@ -30,7 +30,9 @@ def _get_logger(logger_name=__name__) -> logging.Logger:
         logger = logging.getLogger(logger_name)
         logger.setLevel(logging.DEBUG)
         consoleh = logging.StreamHandler(sys.stdout)
-        consoleh.setFormatter(logging.Formatter("%(asctime)s %(levelname)s: %(message)s"))
+        consoleh.setFormatter(
+            logging.Formatter("%(asctime)s %(levelname)s: %(message)s")
+        )
         logger.addHandler(consoleh)
     if "-q" in sys.argv:
         for handler in logging.getLogger().handlers:
@@ -89,7 +91,7 @@ def _analyze(signal, sampling_rate, model):
             )
             # keep previous
             classes.append(classes[-1])
-            probabilites.append(probability[-1])
+            probabilites.append(probabilites[-1])
         # feature extraction:
         mid_features, _ = aF.mid_feature_extraction(
             subsignal,
@@ -219,7 +221,9 @@ def download(args) -> None:
     # Split at every TIME_SPLIT, until the end of file (the end here is bigger then duration)
     ranges = range(0, (ceil(duration / TIME_SPLIT) + 1) * TIME_SPLIT, TIME_SPLIT)
     # join to [range0, range1, range1, range2, range2, range3, ...]
-    files = _split_file(namespace.source, list(chain.from_iterable(zip(ranges, ranges[1:]))))
+    files = _split_file(
+        namespace.source, list(chain.from_iterable(zip(ranges, ranges[1:])))
+    )
     fclasses, fprobabilites = [], []
     for (
         i,
@@ -238,6 +242,8 @@ def download(args) -> None:
     split_at = _find_splits(fclasses, fprobabilites)
     files = _split_file(namespace.source, split_at)
     podcast.make_feed(puntata, files, args.outdir)
+    podcast.make_index(puntata, files, args.outdir)
+    podcast.upload(args.outdir)
     os.unlink(namespace.source)
 
 
@@ -249,7 +255,9 @@ def main():
     parser_split = subparsers.add_parser("split", help="Split an mp3")
     parser_split.set_defaults(func=split)
     parser_split.add_argument("source", type=str)
-    parser_download = subparsers.add_parser("download", help="Download a new episode and split it")
+    parser_download = subparsers.add_parser(
+        "download", help="Download a new episode and split it"
+    )
     parser_download.add_argument("outdir", type=str)
     parser_download.add_argument("-url", type=str)
     parser_download.set_defaults(func=download)

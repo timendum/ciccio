@@ -2,21 +2,23 @@ import re
 import shutil
 from collections import namedtuple
 from datetime import datetime, timedelta
-from os import path, getenv
+from os import getenv, path, unlink
 from urllib.parse import urljoin
 
 import feedendum
 import requests
 from bs4 import BeautifulSoup
+from netlify import NetlifyClient
 
 Puntata = namedtuple("Puntata", ["url", "title", "mp3"])
 
 BASE_URL = getenv("BASE_URL", ".")
+NETLIFY_TOKEN = getenv("NETLIFY")
 
 
 def find_mp3(puntata) -> Puntata | None:
     if not puntata:
-        r = requests.get("https://www.deejay.it/programmi/il-terzo-incomodo/puntate/")
+        r = requests.get("https://www.deejay.it/programmi/chiacchiericcio/puntate/")
         r.raise_for_status()
         hpuntate = BeautifulSoup(r.text, features="lxml")
         puntate = [urljoin(r.url, x["href"]) for x in hpuntate.css.select("h1 a")]
@@ -35,7 +37,7 @@ def find_mp3(puntata) -> Puntata | None:
 
 def already_done(p: Puntata, outdir: str) -> bool:
     try:
-        feed = feedendum.from_rss_file(path.join(outdir, "terzo-incomodo.xml"))
+        feed = feedendum.from_rss_file(path.join(outdir, "chiacchiericcio.xml"))
         return feed.items and p.title in feed.items[0].title
     except OSError:
         return False
@@ -44,13 +46,13 @@ def already_done(p: Puntata, outdir: str) -> bool:
 def make_feed(p: Puntata, files: list[str], outdir: str) -> None:
     now = datetime.now()
     feed = feedendum.feed.Feed(
-        title="Il terzo incomodo - podcast non ufficiale",
-        url="https://www.deejay.it/programmi/il-terzo-incomodo/puntate/",
-        description="Puntate del terzo incomodo, ma con solo gli spezzoni di parlato.",
+        title="Chiacchiericcio - podcast non ufficiale",
+        url="https://www.deejay.it/programmi/chiacchiericcio/",
+        description="Puntate di Chiacchiericcio, ma con solo gli spezzoni di parlato.",
         update=now + timedelta(minutes=30),
         _data={
             "image": {
-                "url": "https://www.omnycontent.com/d/playlist/60311b15-274a-4e3f-8ba9-ac3000834f37/1636480f-f515-4800-ad4b-b07500779d1f/72cf72a2-49cb-42ef-a619-b07500779d52/image.jpg?t=1694095271&size=Large"
+                "url": "https://cdn.gelestatic.it/deejay/sites/2/2023/09/IlTerzoIncomodo__Cover-1200x627-640x334.jpg"
             }
         },
     )
@@ -72,6 +74,30 @@ def make_feed(p: Puntata, files: list[str], outdir: str) -> None:
             )
         )
         shutil.move(f, path.join(outdir, f))
-    with open(path.join(outdir, "terzo-incomodo.xml"), "w", encoding="utf8") as text_file:
+    with open(
+        path.join(outdir, "chiacchiericcio.xml"), "w", encoding="utf8"
+    ) as text_file:
         text_file.write(feedendum.to_rss_string(feed))
     return feed
+
+
+def make_index(p: Puntata, files: list[str], outdir: str) -> None:
+    now = datetime.now()
+    with open("index.html", "r", encoding="utf8") as text_file:
+        template = text_file.read()
+
+    templated = (
+        template.replace("{{title}}", p.title)
+        .replace("{{update}}", now.strftime("%Y-%m-%d %H:%M"))
+        .replace("{{plength}}", f"n{len(files)}")
+    )
+
+    with open(path.join(outdir, "index.html"), "w", encoding="utf8") as text_file:
+        text_file.write(templated)
+
+
+def upload(outdir: str):
+    shutil.make_archive("file", "zip", outdir)
+    client = NetlifyClient(access_token=NETLIFY_TOKEN)
+    client.create_site_deploy("13bcc1e0-974e-44ae-9cbb-361a1ae3cea2", "file.zip")
+    unlink("file.zip")
