@@ -13,7 +13,7 @@ from netlify import NetlifyClient
 Puntata = namedtuple("Puntata", ["url", "title", "mp3"])
 
 BASE_URL = getenv("BASE_URL", ".")
-NETLIFY_TOKEN = getenv("NETLIFY")
+NETLIFY_TOKEN = getenv("NETLIFY", "")
 
 
 def find_mp3(puntata) -> Puntata | None:
@@ -81,7 +81,9 @@ def make_feed(p: Puntata, files: list[str], outdir: str) -> None:
     return feed
 
 
-def make_index(p: Puntata, files: list[str], outdir: str) -> None:
+def make_site(p: Puntata, files: list[str], outdir: str) -> bool:
+    if not NETLIFY_TOKEN:
+        return False
     now = datetime.now()
     with open("index.html", "r", encoding="utf8") as text_file:
         template = text_file.read()
@@ -94,10 +96,15 @@ def make_index(p: Puntata, files: list[str], outdir: str) -> None:
 
     with open(path.join(outdir, "index.html"), "w", encoding="utf8") as text_file:
         text_file.write(templated)
+    return upload(outdir)
 
 
-def upload(outdir: str):
+def upload(outdir: str) -> bool:
+    if not NETLIFY_TOKEN:
+        print("NETLIFY not set")
+        return False
     shutil.make_archive("file", "zip", outdir)
     client = NetlifyClient(access_token=NETLIFY_TOKEN)
     client.create_site_deploy("13bcc1e0-974e-44ae-9cbb-361a1ae3cea2", "file.zip")
     unlink("file.zip")
+    return True

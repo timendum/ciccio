@@ -35,6 +35,8 @@ and every chunk is parsed and analyzed.
 
 Use the `BASE_URL` env var to output full paths for the mp3s.
 
+Use the `NETIFLY` env var to upload mp3s and index to Netifly.
+
 
 ## Remarks
 

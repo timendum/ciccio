@@ -242,8 +242,7 @@ def download(args) -> None:
     split_at = _find_splits(fclasses, fprobabilites)
     files = _split_file(namespace.source, split_at)
     podcast.make_feed(puntata, files, args.outdir)
-    podcast.make_index(puntata, files, args.outdir)
-    podcast.upload(args.outdir)
+    podcast.make_site(puntata, files, args.outdir)
     os.unlink(namespace.source)
 
 
