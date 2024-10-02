@@ -12,7 +12,6 @@ from netlify import NetlifyClient
 
 Puntata = namedtuple("Puntata", ["url", "title", "mp3"])
 
-BASE_URL = getenv("BASE_URL", ".")
 NETLIFY_TOKEN = getenv("NETLIFY", "")
 
 
@@ -66,7 +65,7 @@ def make_feed(p: Puntata, files: list[str], outdir: str) -> None:
                 update=now + timedelta(minutes=i),
                 _data={
                     "enclosure": {
-                        "@url": urljoin(BASE_URL, f),
+                        "@url": urljoin("https://ciccio-podcast.netlify.app/", f),
                         "@type": "audio/mpeg",
                         "@length": str(path.getsize(f)),
                     }
