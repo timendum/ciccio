@@ -30,16 +30,17 @@ def _get_logger(logger_name=__name__) -> logging.Logger:
         logger = logging.getLogger(logger_name)
         logger.setLevel(logging.DEBUG)
         consoleh = logging.StreamHandler(sys.stdout)
+        consoleh.set_name("console")
         consoleh.setFormatter(
             logging.Formatter("%(asctime)s %(levelname)s: %(message)s")
         )
         logger.addHandler(consoleh)
     if "-q" in sys.argv:
-        for handler in logging.getLogger().handlers:
+        for handler in logging.getLogger(logger_name).handlers:
             if handler.get_name() == "console":
                 handler.setLevel(logging.ERROR)
     elif "-v" in sys.argv:
-        for handler in logging.getLogger().handlers:
+        for handler in logging.getLogger(logger_name).handlers:
             if handler.get_name() == "console":
                 handler.setLevel(logging.DEBUG)
     return logger
@@ -261,6 +262,9 @@ def download(args) -> None:
 def main():
     parser = argparse.ArgumentParser("ciccio")
     subparsers = parser.add_subparsers(help="Modules:")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-q", "--quiet", action="store_true")
+    group.add_argument("-v", "--verbose", action="store_true")
     parser_train = subparsers.add_parser("train", help="Train the module")
     parser_train.set_defaults(func=train)
     parser_split = subparsers.add_parser("split", help="Split an mp3")
