@@ -66,7 +66,6 @@ def train(_):
         1,
         aT.shortTermWindow,
         aT.shortTermStep,
-        "svm",
         MODEL_NAME,
     )
 

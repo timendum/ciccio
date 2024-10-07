@@ -14,7 +14,7 @@ shortTermWindow = 0.050
 shortTermStep = 0.050
 
 
-def classifier_wrapper(classifier, classifier_type, test_sample):
+def classifier_wrapper(classifier, test_sample):
     """
     This function is used as a wrapper to pattern classification.
     ARGUMENTS:
@@ -23,8 +23,6 @@ def classifier_wrapper(classifier, classifier_type, test_sample):
                              RandomForestClassifier or sklearn.ensemble.
                              GradientBoostingClassifier  or
                              sklearn.ensemble.ExtraTreesClassifier
-        - classifier_type:   "svm" or "knn" or "randomforests" or
-                             "gradientboosting" or "extratrees"
         - test_sample:        a feature vector (np array)
     RETURNS:
         - R:            class ID
@@ -32,11 +30,8 @@ def classifier_wrapper(classifier, classifier_type, test_sample):
     """
     class_id = -1
     probability = -1
-    if classifier_type == "svm":
-        class_id = classifier.predict(test_sample.reshape(1, -1))[0]
-        probability = classifier.predict_proba(test_sample.reshape(1, -1))[0]
-    else:
-        raise ValueError("Unsupported classifier_type: " + classifier_type)
+    class_id = classifier.predict(test_sample.reshape(1, -1))[0]
+    probability = classifier.predict_proba(test_sample.reshape(1, -1))[0]
     return class_id, probability
 
 
@@ -71,7 +66,6 @@ def extract_features_and_train(
     mid_step,
     short_window,
     short_step,
-    classifier_type,
     model_name,
     train_percentage=0.90,
 ):
@@ -114,10 +108,7 @@ def extract_features_and_train(
             return
 
     # STEP B: classifier Evaluation and Parameter Selection:
-    if classifier_type == "svm":
-        classifier_par = np.array([0.001, 0.01, 0.5, 1.0, 5.0, 10.0, 20.0])
-    else:
-        raise ValueError("Unsupported classifier_type: " + classifier_type)
+    classifier_par = np.array([0.001, 0.01, 0.5, 1.0, 5.0, 10.0, 20.0])
 
     # get optimal classifier parameter:
     temp_features = []
@@ -135,7 +126,6 @@ def extract_features_and_train(
     best_param = evaluate_classifier(
         features,
         class_names,
-        classifier_type,
         classifier_par,
         1,
         n_exp=-1,
@@ -155,37 +145,30 @@ def extract_features_and_train(
     std = scaler.scale_.tolist()
 
     # Then train the final classifier
-    if classifier_type == "svm":
-        classifier = train_svm(features, labels, best_param)
-    else:
-        raise ValueError("Unsupported classifier_type: " + classifier_type)
+    classifier = train_svm(features, labels, best_param)
 
     # And save the model to a file, along with
     # - the scaling -mean/std- vectors)
     # - the feature extraction parameters
 
-    if classifier_type == "svm":
+    from skl2onnx import to_onnx
 
-        from skl2onnx import to_onnx
-
-        onnx = to_onnx(classifier, features[0].astype(np.float32))
-        with open(model_name + ".onnx", "wb") as fid:
-            fid.write(onnx.SerializeToString())
-        with open(model_name, "wb") as fid:
-            cPickle.dump(classifier, fid)
-        save_path = model_name + "_MEANS"
-        save_parameters(
-            save_path,
-            mean,
-            std,
-            class_names,
-            mid_window,
-            mid_step,
-            short_window,
-            short_step,
-        )
-    else:
-        raise ValueError("Unsupported classifier_type: " + classifier_type)
+    onnx = to_onnx(classifier, features[0].astype(np.float32))
+    with open(model_name + ".onnx", "wb") as fid:
+        fid.write(onnx.SerializeToString())
+    with open(model_name, "wb") as fid:
+        cPickle.dump(classifier, fid)
+    save_path = model_name + "_MEANS"
+    save_parameters(
+        save_path,
+        mean,
+        std,
+        class_names,
+        mid_window,
+        mid_step,
+        short_window,
+        short_step,
+    )
 
 
 def save_parameters(path, *parameters) -> None:
@@ -256,7 +239,6 @@ def group_split(X, y, train_indeces, test_indeces, split_id):
 def evaluate_classifier(
     features,
     class_names,
-    classifier_name,
     params,
     parameter_mode,
     n_exp=-1,
@@ -268,7 +250,6 @@ def evaluate_classifier(
                       np matrices of features. Each matrix features[i] of
                       class i is [n_samples x numOfDimensions]
         class_names:    list of class names (strings)
-        classifier_name: svm or knn or randomforest
         params:        list of classifier parameters (for parameter
                        tuning during cross-validation)
         parameter_mode:    0: choose parameters that lead to maximum overall
@@ -328,19 +309,14 @@ def evaluate_classifier(
             X_train = scaler.transform(X_train)
 
             # train multi-class svms:
-            if classifier_name == "svm":
-                classifier = train_svm(X_train, y_train, C)
-            else:
-                raise ValueError("Unsupported classifier_type: " + classifier_name)
+            classifier = train_svm(X_train, y_train, C)
 
             # get predictions and compute current comfusion matrix
             cmt = np.zeros((n_classes, n_classes))
             X_test = scaler.transform(X_test)
             for i_test_sample in range(X_test.shape[0]):
                 y_pred.append(
-                    classifier_wrapper(
-                        classifier, classifier_name, X_test[i_test_sample, :]
-                    )[0]
+                    classifier_wrapper(classifier, X_test[i_test_sample, :])[0]
                 )
             # current confusion matrices and F1:
             cmt = sklearn.metrics.confusion_matrix(y_test, y_pred)
