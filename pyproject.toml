@@ -1,9 +1,4 @@
 [project]
-name = "ciccio-podcast"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.10"
 dependencies = [
     "scipy>=1.11.2,<2",
     "numpy>=1.25,<2",
@@ -14,7 +9,16 @@ dependencies = [
     "requests>=2.31.0,<3",
     "beautifulsoup4>=4.12.2,<5",
     "netlify-python>=0.3.1,<1",
+    "onnx==1.16.1",
+    "skl2onnx>=1.17.0,<2",
+    "onnxruntime>=1.19.2,<2",
+    "pyfftw>=0.14.0,<1",
 ]
+name = "ciccio-podcast"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
 
 [build-system]
 requires = ["hatchling"]

@@ -49,14 +49,17 @@ LOGGER = _get_logger()
 LOGGER.debug("Starting...")
 
 # Slow imports
+import numpy as np
+import pyfftw
 import requests
+import scipy
 
 from pyAudioAnalysis import MidTermFeatures as aF
 from pyAudioAnalysis import audioBasicIO
 from pyAudioAnalysis import audioTrainTest as aT
 
 
-def train(args):
+def train(_):
     return aT.extract_features_and_train(
         ["data/ko", "data/ok"],
         1,
@@ -81,36 +84,46 @@ def _analyze(signal, sampling_rate, model):
     ) = model
     classes = []
     probabilites = []
-    for i in range(0, len(signal), aF.STEP_SIZE * sampling_rate):
-        subsignal = signal[i : i + (aF.STEP_SIZE * sampling_rate)]
-        if len(subsignal) < round(sampling_rate * short_step):
-            LOGGER.debug(
-                "Remaining signal is too short: from %d to %d",
-                i / sampling_rate,
-                i / sampling_rate + aF.STEP_SIZE,
+    input_name = classifier.get_inputs()[0].name
+    label_name = classifier.get_outputs()[0].name
+    prob_name = classifier.get_outputs()[1].name
+    with scipy.fft.set_backend(pyfftw.interfaces.scipy_fft):
+        # Turn on the cache for optimum performance
+        pyfftw.interfaces.cache.enable()
+        for i in range(0, len(signal), aF.STEP_SIZE * sampling_rate):
+            subsignal = signal[i : i + (aF.STEP_SIZE * sampling_rate)]
+            if len(subsignal) < round(sampling_rate * short_step):
+                LOGGER.debug(
+                    "Remaining signal is too short: from %d to %d",
+                    i / sampling_rate,
+                    i / sampling_rate + aF.STEP_SIZE,
+                )
+                # keep previous
+                classes.append(classes[-1])
+                probabilites.append(probabilites[-1])
+            # feature extraction:
+            mid_features, _ = aF.mid_feature_extraction(
+                subsignal,
+                sampling_rate,
+                mid_window * sampling_rate,
+                mid_step * sampling_rate,
+                round(sampling_rate * short_window),
+                round(sampling_rate * short_step),
             )
-            # keep previous
-            classes.append(classes[-1])
-            probabilites.append(probabilites[-1])
-        # feature extraction:
-        mid_features, _ = aF.mid_feature_extraction(
-            subsignal,
-            sampling_rate,
-            mid_window * sampling_rate,
-            mid_step * sampling_rate,
-            round(sampling_rate * short_window),
-            round(sampling_rate * short_step),
-        )
-        # long term averaging of mid-term statistics
-        mid_features = mid_features.mean(axis=1)
-        feature_vector = (mid_features - mean) / std  # normalization
+            # long term averaging of mid-term statistics
+            mid_features = mid_features.mean(axis=1)
+            feature_vector = (mid_features - mean) / std  # normalization
 
-        # classification
-        class_id = classifier.predict(feature_vector.reshape(1, -1))[0]
-        classes.append(class_id)
-        probability = classifier.predict_proba(feature_vector.reshape(1, -1))[0]
-        probabilites.append(probability)
-        # LOGGER.debug("Step: %d/%d", i / sampling_rate, len(signal) / sampling_rate)
+            # classification
+            # class_id = classifier.predict(feature_vector.reshape(1, -1))[0]
+            # probability = classifier.predict_proba(feature_vector.reshape(1, -1))[0]
+            cout = classifier.run(
+                [label_name, prob_name],
+                {input_name: feature_vector.reshape(1, -1).astype(np.float32)},
+            )
+            classes.append(cout[0][0])
+            probabilites.append(list(cout[1][0].values()))
+            # LOGGER.debug("Step: %d/%d", i / sampling_rate, len(signal) / sampling_rate)
     return classes, probabilites
 
 

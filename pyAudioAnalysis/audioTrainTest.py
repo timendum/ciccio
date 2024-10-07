@@ -106,7 +106,11 @@ def extract_features_and_train(
 
     for i, feat in enumerate(features):
         if len(feat) == 0:
-            print("trainSVM_feature ERROR: " + paths[i] + " folder is empty or non-existing!")
+            print(
+                "trainSVM_feature ERROR: "
+                + paths[i]
+                + " folder is empty or non-existing!"
+            )
             return
 
     # STEP B: classifier Evaluation and Parameter Selection:
@@ -161,6 +165,12 @@ def extract_features_and_train(
     # - the feature extraction parameters
 
     if classifier_type == "svm":
+
+        from skl2onnx import to_onnx
+
+        onnx = to_onnx(classifier, features[0].astype(np.float32))
+        with open(model_name + ".onnx", "wb") as fid:
+            fid.write(onnx.SerializeToString())
         with open(model_name, "wb") as fid:
             cPickle.dump(classifier, fid)
         save_path = model_name + "_MEANS"
@@ -202,8 +212,13 @@ def load_model(model_name):
     mean = np.array(mean)
     std = np.array(std)
 
-    with open(model_name, "rb") as fid:
-        svm_model = cPickle.load(fid)
+    # with open(model_name, "rb") as fid:
+    #     svm_model = cPickle.load(fid)
+    import onnxruntime as ort
+
+    svm_model = ort.InferenceSession(
+        model_name + ".onnx", providers=["CPUExecutionProvider"]
+    )
 
     return (
         svm_model,
@@ -323,7 +338,9 @@ def evaluate_classifier(
             X_test = scaler.transform(X_test)
             for i_test_sample in range(X_test.shape[0]):
                 y_pred.append(
-                    classifier_wrapper(classifier, classifier_name, X_test[i_test_sample, :])[0]
+                    classifier_wrapper(
+                        classifier, classifier_name, X_test[i_test_sample, :]
+                    )[0]
                 )
             # current confusion matrices and F1:
             cmt = sklearn.metrics.confusion_matrix(y_test, y_pred)
