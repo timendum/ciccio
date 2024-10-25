@@ -9,7 +9,7 @@ dependencies = [
     "requests>=2.31.0,<3",
     "beautifulsoup4>=4.12.2,<5",
     "netlify-python>=0.3.1,<1",
-    "onnx==1.16.1",
+    "onnx==1.17.0",
     "skl2onnx>=1.17.0,<2",
     "onnxruntime>=1.19.2,<2",
     "pyfftw>=0.14.0,<1",
