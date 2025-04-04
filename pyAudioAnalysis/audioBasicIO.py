@@ -52,7 +52,7 @@ def read_audio_generic(input_file):
             for chn in list(range(audiofile.channels)):
                 temp_signal.append(data[chn :: audiofile.channels])
             signal = np.array(temp_signal).T
-    except:
+    except IOError:
         raise ValueError("Error: file not found or other I/O error. (DECODING FAILED)")
     return sampling_rate, signal
 

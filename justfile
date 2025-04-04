@@ -14,3 +14,12 @@ split *FLAGS:
 
 setup:
   uv sync
+
+lint:
+  uvx ruff check .
+
+cformat:
+  uvx ruff format --check .
+
+format:
+  uvx ruff format .

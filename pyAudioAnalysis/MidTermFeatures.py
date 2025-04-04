@@ -12,7 +12,9 @@ eps = 0.00000001
 """ Time-domain audio features """
 
 
-def mid_feature_extraction(signal, sampling_rate, mid_window, mid_step, short_window, short_step):
+def mid_feature_extraction(
+    signal, sampling_rate, mid_window, mid_step, short_window, short_step
+):
     """
     Mid-term feature extraction
 
@@ -66,7 +68,9 @@ def mid_feature_extraction(signal, sampling_rate, mid_window, mid_step, short_wi
     return mid_features, short_features
 
 
-def directory_feature_extraction(folder_path, mid_window, mid_step, short_window, short_step):
+def directory_feature_extraction(
+    folder_path, mid_window, mid_step, short_window, short_step
+):
     """
     This function extracts the mid-term features of the WAVE files of a
     particular folder.
@@ -92,7 +96,11 @@ def directory_feature_extraction(folder_path, mid_window, mid_step, short_window
     wav_file_list = sorted(wav_file_list)
     wav_file_list2 = []
     for i, file_path in enumerate(wav_file_list):
-        print("Analyzing file {0:d} of {1:d}: {2:s}".format(i + 1, len(wav_file_list), file_path))
+        print(
+            "Analyzing file {0:d} of {1:d}: {2:s}".format(
+                i + 1, len(wav_file_list), file_path
+            )
+        )
         if os.stat(file_path).st_size == 0:
             print("   (EMPTY FILE -- SKIPPING)")
             continue
@@ -123,7 +131,9 @@ def directory_feature_extraction(folder_path, mid_window, mid_step, short_window
             mid_features = np.transpose(mid_features)
             mid_features = mid_features.mean(axis=0)
             # long term averaging of mid-term statistics
-            if (not np.isnan(mid_features).any()) and (not np.isinf(mid_features).any()):
+            if (not np.isnan(mid_features).any()) and (
+                not np.isinf(mid_features).any()
+            ):
                 if len(mid_term_features) == 0:
                     # append feature vector
                     mid_term_features = mid_features
@@ -134,8 +144,9 @@ def directory_feature_extraction(folder_path, mid_window, mid_step, short_window
         process_times.append((t2 - t1) / duration)
     if len(process_times) > 0:
         print(
-            "Feature extraction complexity ratio: "
-            "{0:.1f} x realtime".format((1.0 / np.mean(np.array(process_times))))
+            "Feature extraction complexity ratio: {0:.1f} x realtime".format(
+                (1.0 / np.mean(np.array(process_times)))
+            )
         )
     return mid_term_features, wav_file_list2
 
@@ -164,7 +175,9 @@ def multiple_directory_feature_extraction(
     class_names = []
     file_names = []
     for i, d in enumerate(path_list):
-        f, fn = directory_feature_extraction(d, mid_window, mid_step, short_window, short_step)
+        f, fn = directory_feature_extraction(
+            d, mid_window, mid_step, short_window, short_step
+        )
         if f.shape[0] > 0:
             # if at least one audio file has been found in the provided folder:
             features.append(f)

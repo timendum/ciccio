@@ -179,7 +179,7 @@ def _split_file(source, split_at, fade=False) -> list[str]:
         except IndexError:
             # end of file
             pass
-        filename = f"{target}_{int(i/2)+1:02}.mp3"
+        filename = f"{target}_{int(i / 2) + 1:02}.mp3"
         if fade:
             try:
                 split_command.extend(

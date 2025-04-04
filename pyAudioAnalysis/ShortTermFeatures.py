@@ -53,7 +53,9 @@ def energy_entropy(frame, n_short_blocks=10):
 
 def spectral_centroid_spread(fft_magnitude, sampling_rate):
     """Computes spectral centroid of frame (given abs(FFT))"""
-    ind = (np.arange(1, len(fft_magnitude) + 1)) * (sampling_rate / (2.0 * len(fft_magnitude)))
+    ind = (np.arange(1, len(fft_magnitude) + 1)) * (
+        sampling_rate / (2.0 * len(fft_magnitude))
+    )
 
     Xt = fft_magnitude.copy()
     Xt_max = Xt.max()
@@ -113,7 +115,9 @@ def spectral_flux(fft_magnitude, previous_fft_magnitude):
     # compute the spectral flux as the sum of square distances:
     fft_sum = np.sum(fft_magnitude + eps)
     previous_fft_sum = np.sum(previous_fft_magnitude + eps)
-    sp_flux = np.sum((fft_magnitude / fft_sum - previous_fft_magnitude / previous_fft_sum) ** 2)
+    sp_flux = np.sum(
+        (fft_magnitude / fft_sum - previous_fft_magnitude / previous_fft_sum) ** 2
+    )
 
     return sp_flux
 
@@ -216,7 +220,9 @@ def chroma_features_init(num_fft, sampling_rate):
     This function initializes the chroma matrices used in the calculation
     of the chroma features
     """
-    freqs = np.array([((f + 1) * sampling_rate) / (2 * num_fft) for f in range(num_fft)])
+    freqs = np.array(
+        [((f + 1) * sampling_rate) / (2 * num_fft) for f in range(num_fft)]
+    )
     cp = 27.50
     num_chroma = np.round(12.0 * np.log2(freqs / cp)).astype(int)
 
@@ -242,7 +248,7 @@ def chroma_features(signal, sampling_rate, num_fft):
         C[num_chroma] = spec
         C /= num_freqs_per_chroma[num_chroma]
     else:
-        I = np.nonzero(num_chroma > num_chroma.shape[0])[0][0]
+        I = np.nonzero(num_chroma > num_chroma.shape[0])[0][0]  # noqa: E741
         C = np.zeros((num_chroma.shape[0],))
         C[num_chroma[0 : I - 1]] = spec
         C /= num_freqs_per_chroma
@@ -312,7 +318,9 @@ def feature_extraction(signal, sampling_rate, window, step, deltas=True):
     n_harmonic_feats = 0
     n_mfcc_feats = 13
     # n_chroma_feats = 13
-    n_total_feats = n_time_spectral_feats + n_mfcc_feats + n_harmonic_feats  # + n_chroma_feats
+    n_total_feats = (
+        n_time_spectral_feats + n_mfcc_feats + n_harmonic_feats
+    )  # + n_chroma_feats
     #    n_total_feats = n_time_spectral_feats + n_mfcc_feats +
     #    n_harmonic_feats
 
@@ -381,7 +389,9 @@ def feature_extraction(signal, sampling_rate, window, step, deltas=True):
                 delta = feature_vector - feature_vector_prev
                 feature_vector_2 = np.concatenate((feature_vector, delta))
             else:
-                feature_vector_2 = np.concatenate((feature_vector, np.zeros(feature_vector.shape)))
+                feature_vector_2 = np.concatenate(
+                    (feature_vector, np.zeros(feature_vector.shape))
+                )
             feature_vector_prev = feature_vector
             features.append(feature_vector_2)
 
