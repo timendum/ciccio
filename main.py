@@ -101,6 +101,7 @@ def _analyze(signal, sampling_rate, model):
                 # keep previous
                 classes.append(classes[-1])
                 probabilites.append(probabilites[-1])
+                continue
             # feature extraction:
             mid_features, _ = aF.mid_feature_extraction(
                 subsignal,
