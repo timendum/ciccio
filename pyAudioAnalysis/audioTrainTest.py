@@ -1,8 +1,6 @@
 import pickle as cPickle
 
 import numpy as np
-import sklearn.decomposition
-import sklearn.ensemble
 import sklearn.metrics
 import sklearn.svm
 from sklearn.model_selection import train_test_split
