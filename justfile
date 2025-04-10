@@ -4,7 +4,7 @@ default:
   just --list
 
 download FOLDER="o" *FLAGS:
-  uv run main.py {{FLAGS}} download {{FOLDER}}
+  @uv run main.py {{FLAGS}} download {{FOLDER}}
 
 train *FLAGS:
   uv run main.py {{FLAGS}} train
